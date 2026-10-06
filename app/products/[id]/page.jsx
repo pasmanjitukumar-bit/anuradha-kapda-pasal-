@@ -1,0 +1,6 @@
+import { products } from '../../../lib/products.mjs';
+import Store from '../../../components/Store';
+import {business} from '../../../lib/business.mjs';
+export function generateStaticParams(){return products.map(p=>({id:p.id}));}
+export async function generateMetadata({params}){const {id}=await params;const p=products.find(p=>p.id===id);return {title:`${p.name.en} | Anuradha Kapda Pasal`,description:p.description.en,openGraph:{title:p.name.en,description:p.description.en,images:[p.images[0]]}};}
+export default async function Page({params}){const {id}=await params;const product=products.find(p=>p.id===id);const schema={'@context':'https://schema.org','@type':'Product',name:product.name.en,description:product.description.en,image:product.images,brand:{'@type':'Brand',name:business.storeName},offers:{'@type':'Offer',priceCurrency:'NPR',price:product.price,availability:product.stockStatus==='in-stock'?'https://schema.org/InStock':'https://schema.org/OutOfStock'}};return <><Store productId={id}/>{!product.demo&&['in-stock','out-of-stock'].includes(product.stockStatus)&&<script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>}</>;}
